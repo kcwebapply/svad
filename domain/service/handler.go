@@ -38,13 +38,10 @@ func getBody(ctx *gin.Context) string {
 	buf := make([]byte, 1024)
 	num, _ := ctx.Request.Body.Read(buf)
 	reqBody := string(buf[0:num])
-	fmt.Println("body;" + reqBody)
 	return reqBody
 }
 
 func handleRequest(ctx *gin.Context, requestTypeEnum *RequestTypeEnum) {
-	fmt.Println("Id:", requestTypeEnum.ID)
-	fmt.Println("String:", requestTypeEnum.StringValue)
 	request := ctx.Request
 	if request.Method == "GET" {
 

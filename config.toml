@@ -1,0 +1,8 @@
+[DB]
+  host = "localhost"
+  port =  8888
+  user = "wadakeishi"
+  password = "qazwsx12e"
+  dbName = "test"
+  enabled = false
+  driver = "postgres"
