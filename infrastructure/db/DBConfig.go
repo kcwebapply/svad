@@ -9,17 +9,20 @@ import (
 )
 
 var conn *dbr.Connection
+var filePath = "config.toml"
 
 // db initialization
 func init() {
 
-	var config Config = getConfig()
+	var config Config = getConfig(filePath)
 
 	var user = config.DB.User
 	var password = config.DB.Password
 	var host = config.DB.Host
 	var dbname = config.DB.DbName
 	var driver = config.DB.Driver
+
+	fmt.Println("user:", user)
 
 	if user == "" {
 
@@ -54,9 +57,9 @@ func GetConnection() *dbr.Connection {
 }
 
 // get config prom toml property
-func getConfig() Config {
+func getConfig(filePath string) Config {
 	var config Config
-	toml.DecodeFile("config.toml", &config)
+	toml.DecodeFile(filePath, &config)
 	return config
 }
 

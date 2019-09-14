@@ -6,12 +6,14 @@ import (
 )
 
 const (
-	SVAD  = "/register/"
-	PROXY = "/svad/"
+	REGISTER = "/register"
+	SERVICES = "/services/"
+	PROXY    = "/svad"
 )
 
 func SetRouter(r *gin.Engine) *gin.Engine {
-	r.POST(SVAD, service.RegisterService)
+	r.POST(REGISTER, service.RegisterService)
+	r.GET(SERVICES, service.ReturnServices)
 	r.GET(PROXY, service.GetHandler)
 	r.POST(PROXY, service.PostHandler)
 	r.PUT(PROXY, service.PutHandler)

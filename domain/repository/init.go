@@ -12,6 +12,6 @@ var (
 
 func init() {
 	Db = db.GetConnection()
-	Db.SetMaxOpenConns(10)
+	//Db.SetMaxOpenConns(10)
 	Sess = Db.NewSession(nil)
 }
