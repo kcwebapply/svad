@@ -1,11 +1,11 @@
 package service
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kcwebapply/svad/common"
 	"github.com/kcwebapply/svad/domain/model"
 	"github.com/kcwebapply/svad/domain/repository"
 )
@@ -14,7 +14,6 @@ import (
 func RegisterService(ctx *gin.Context) {
 	// get service name
 	var serviceName = ctx.GetHeader("service-name")
-
 	// requestBody
 	requestBody := RegisterBody{}
 	if err := ctx.BindJSON(&requestBody); err != nil {
@@ -27,13 +26,19 @@ func RegisterService(ctx *gin.Context) {
 
 	// Register Services
 	for _, serviceURL := range serviceURLList {
-		if _, err := url.Parse(serviceURL); err != nil {
-			fmt.Println("error parsing!", serviceURL)
+
+		urlObj, err := url.Parse(serviceURL)
+
+		if err != nil {
+			common.ThrowError(err)
 		}
 
-		var entity = model.ServiceEntity{ServiceName: serviceName, Host: serviceURL}
+		hostname := urlObj.Hostname()
+
+		var entity = model.ServiceEntity{ServiceName: serviceName, Host: hostname}
+
 		if err := repository.SaveHosts(entity); err != nil {
-			fmt.Println(err)
+			common.ThrowError(err)
 		}
 	}
 

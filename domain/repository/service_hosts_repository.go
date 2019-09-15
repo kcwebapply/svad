@@ -23,7 +23,6 @@ func init() {
 
 func CreateTable() {
 	_, err := sess.Exec("create table service_hosts(id serial, service_name TEXT, host TEXT, primary key(id) );")
-
 	if err != nil {
 		fmt.Println("create table error,", err)
 	}

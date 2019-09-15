@@ -1,41 +1,44 @@
 package service
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kcwebapply/svad/common"
 	"github.com/kcwebapply/svad/domain/model"
 	"github.com/kcwebapply/svad/domain/repository"
 )
 
+// ReturnServices func returns all services registered on svad with its hosts.
 func ReturnServices(ctx *gin.Context) {
+	// fetch sall erivces-hosts entity
 	services, err := repository.GetAllServicesAndHosts()
+
 	if err != nil {
-		fmt.Println("err!", err)
+		common.ThrowError(err)
 	}
 
-	serviceMapper, err := generateServiceHostsJsonMapper(services)
+	// genetate services-hosts map.
+	serviceMapper, err := generateServiceHostsMapper(services)
+	if err != nil {
+		common.ThrowError(err)
+	}
+
 	ctx.JSON(http.StatusOK, serviceMapper)
 
 }
 
-func generateServiceHostsJsonMapper(serviceEntities []model.ServiceEntity) (map[string]HostStruct, error) {
-	serviceMapper := map[string]HostStruct{}
+func generateServiceHostsMapper(serviceEntities []model.ServiceEntity) (map[string][]string, error) {
+	serviceMapper := map[string][]string{}
 
 	for _, e := range serviceEntities {
 		// map exists check
 		if _, exist := serviceMapper[e.ServiceName]; exist {
-			hosts := serviceMapper[e.ServiceName].Hosts
-			hosts = append(hosts, e.Host)
-			serviceMapper[e.ServiceName] = HostStruct{Hosts: hosts}
+			hosts := append(serviceMapper[e.ServiceName], e.Host)
+			serviceMapper[e.ServiceName] = hosts
 		} else {
-			serviceMapper[e.ServiceName] = HostStruct{Hosts: []string{e.Host}}
+			serviceMapper[e.ServiceName] = []string{e.Host}
 		}
 	}
 	return serviceMapper, nil
-}
-
-type HostStruct struct {
-	Hosts []string `json:"hosts" binding:"required"`
 }
