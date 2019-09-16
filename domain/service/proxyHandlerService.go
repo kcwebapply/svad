@@ -4,14 +4,24 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kcwebapply/svad/infrastructure/repository"
 )
 
-func GetHandler(ctx *gin.Context) {
+type ProxyHandlerServiceImpl struct {
+	serviceHostsRepository repository.ServiceHostsRepository
+}
+
+func NewProxyHandlerServiceImpl() ProxyHandlerService {
+	serviceHostsRepository := repository.ServiceHostsRepositoryImpl{}
+	return &ProxyHandlerServiceImpl{serviceHostsRepository: &serviceHostsRepository}
+}
+
+func (this *ProxyHandlerServiceImpl) GetHandler(ctx *gin.Context) {
 	requestTypeEnum := GetRequestTypeEnum(ctx.GetHeader("request-type"))
 	handleRequest(ctx, requestTypeEnum)
 }
 
-func PostHandler(ctx *gin.Context) {
+func (this *ProxyHandlerServiceImpl) PostHandler(ctx *gin.Context) {
 	requestTypeEnum := GetRequestTypeEnum(ctx.GetHeader("request-type"))
 	contentType := ctx.ContentType()
 	//body := getBody(ctx)
@@ -24,12 +34,12 @@ func PostHandler(ctx *gin.Context) {
 	//handleRequest(ctx, requestTypeEnum)
 }
 
-func DeleteHandler(ctx *gin.Context) {
+func (this *ProxyHandlerServiceImpl) DeleteHandler(ctx *gin.Context) {
 	requestTypeEnum := GetRequestTypeEnum(ctx.GetHeader("request-type"))
 	handleRequest(ctx, requestTypeEnum)
 }
 
-func PutHandler(ctx *gin.Context) {
+func (this *ProxyHandlerServiceImpl) PutHandler(ctx *gin.Context) {
 	requestTypeEnum := GetRequestTypeEnum(ctx.GetHeader("request-type"))
 	handleRequest(ctx, requestTypeEnum)
 }

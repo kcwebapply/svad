@@ -13,14 +13,15 @@ const (
 
 var (
 	serviceHostsService = service.NewSerivceImpl()
+	proxyHandlerService = service.NewProxyHandlerServiceImpl()
 )
 
 func SetRouter(r *gin.Engine) *gin.Engine {
 	r.POST(REGISTER, serviceHostsService.RegisterService)
 	r.GET(SERVICES, serviceHostsService.ReturnServices)
-	r.GET(PROXY, service.GetHandler)
-	r.POST(PROXY, service.PostHandler)
-	r.PUT(PROXY, service.PutHandler)
-	r.DELETE(PROXY, service.DeleteHandler)
+	r.GET(PROXY, proxyHandlerService.GetHandler)
+	r.POST(PROXY, proxyHandlerService.PostHandler)
+	r.PUT(PROXY, proxyHandlerService.PutHandler)
+	r.DELETE(PROXY, proxyHandlerService.DeleteHandler)
 	return r
 }

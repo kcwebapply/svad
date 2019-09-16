@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -17,7 +16,6 @@ type ServiceHostsServiceImpl struct {
 
 func NewSerivceImpl() ServiceHostsService {
 	serviceHostsRepository := repository.ServiceHostsRepositoryImpl{}
-	fmt.Println("repository:", serviceHostsRepository)
 	return &ServiceHostsServiceImpl{serviceHostsRepository: &serviceHostsRepository}
 }
 
@@ -43,9 +41,9 @@ func (this *ServiceHostsServiceImpl) RegisterService(ctx *gin.Context) {
 			common.ThrowError(err)
 		}
 
-		hostname := urlObj.Hostname()
+		urlString := generateDomainName(urlObj)
 
-		var entity = model.ServiceEntity{ServiceName: serviceName, Host: hostname}
+		var entity = model.ServiceEntity{ServiceName: serviceName, Host: urlString}
 
 		if err := this.serviceHostsRepository.SaveHosts(entity); err != nil {
 			common.ThrowError(err)
@@ -74,6 +72,14 @@ func (this *ServiceHostsServiceImpl) ReturnServices(ctx *gin.Context) {
 
 type RegisterBody struct {
 	Hosts []string `json:"hosts" binding:"required"`
+}
+
+func generateDomainName(urlObj *url.URL) string {
+	scheme := urlObj.Scheme
+	suffix := "://"
+	hostName := urlObj.Hostname()
+	domain := scheme + suffix + hostName
+	return domain
 }
 
 func generateServiceHostsMapper(serviceEntities []model.ServiceEntity) (map[string][]string, error) {
