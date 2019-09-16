@@ -11,9 +11,13 @@ const (
 	PROXY    = "/svad"
 )
 
+var (
+	serviceHostsService = service.NewSerivceImpl()
+)
+
 func SetRouter(r *gin.Engine) *gin.Engine {
-	r.POST(REGISTER, service.RegisterService)
-	r.GET(SERVICES, service.ReturnServices)
+	r.POST(REGISTER, serviceHostsService.RegisterService)
+	r.GET(SERVICES, serviceHostsService.ReturnServices)
 	r.GET(PROXY, service.GetHandler)
 	r.POST(PROXY, service.PostHandler)
 	r.PUT(PROXY, service.PutHandler)
