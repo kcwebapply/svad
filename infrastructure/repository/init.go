@@ -6,12 +6,13 @@ import (
 )
 
 var (
-	Db   *dbr.Connection
-	Sess *dbr.Session
+	dbConn *dbr.Connection
+	sess   *dbr.Session
 )
 
 func init() {
-	Db = db.GetConnection()
+	dbConn = db.GetConnection()
 	//Db.SetMaxOpenConns(10)
-	Sess = Db.NewSession(nil)
+	sess = dbConn.NewSession(nil)
+	CreateServiceHostsTable()
 }

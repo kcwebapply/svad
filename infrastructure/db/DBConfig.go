@@ -22,8 +22,6 @@ func init() {
 	var dbname = config.DB.DbName
 	var driver = config.DB.Driver
 
-	fmt.Println("user:", user)
-
 	if user == "" {
 
 	}
