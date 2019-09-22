@@ -8,7 +8,8 @@ import (
 const (
 	REGISTER = "/register"
 	SERVICES = "/services/"
-	PROXY    = "/svad"
+
+	PROXY_X = "/svad/:endpoint"
 )
 
 var (
@@ -19,9 +20,9 @@ var (
 func SetRouter(r *gin.Engine) *gin.Engine {
 	r.POST(REGISTER, serviceHostsService.RegisterService)
 	r.GET(SERVICES, serviceHostsService.ReturnServices)
-	r.GET(PROXY, proxyHandlerService.GetHandler)
-	r.POST(PROXY, proxyHandlerService.PostHandler)
-	r.PUT(PROXY, proxyHandlerService.PutHandler)
-	r.DELETE(PROXY, proxyHandlerService.DeleteHandler)
+	r.GET(PROXY_X, proxyHandlerService.RequestHandler)
+	r.POST(PROXY_X, proxyHandlerService.RequestHandler)
+	r.PUT(PROXY_X, proxyHandlerService.RequestHandler)
+	r.DELETE(PROXY_X, proxyHandlerService.RequestHandler)
 	return r
 }

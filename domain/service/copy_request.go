@@ -10,11 +10,11 @@ var (
 	registeredHeader = []string{"service"}
 )
 
-func copyPostRequest(url string, request *http.Request) http.Request {
+func copyPostRequest(url, contentType string, request *http.Request) http.Request {
 
 	newRequest := http.Request{}
 
-	newHeader := copyHeader(request.Header)
+	newHeader := copyRequestHeader(request.Header)
 
 	newRequest.Header = newHeader
 	newRequest.Method = http.MethodPost
@@ -24,7 +24,7 @@ func copyPostRequest(url string, request *http.Request) http.Request {
 	return newRequest
 }
 
-func copyHeader(srcHeader http.Header) http.Header {
+func copyRequestHeader(srcHeader http.Header) http.Header {
 	dstHeader := http.Header{}
 
 	for k, vs := range srcHeader {
