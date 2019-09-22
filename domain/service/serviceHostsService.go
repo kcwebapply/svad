@@ -22,7 +22,7 @@ func NewSerivceImpl() ServiceHostsService {
 // RegisterService save service - host binding.
 func (this *ServiceHostsServiceImpl) RegisterService(ctx *gin.Context) {
 	// get service name
-	var serviceName = ctx.GetHeader("service-name")
+	var serviceName = ctx.GetHeader(common.SERVICE_NAME_HEADER_NAME)
 	// requestBody
 	requestBody := RegisterBody{}
 	if err := ctx.BindJSON(&requestBody); err != nil {
