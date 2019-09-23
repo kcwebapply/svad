@@ -38,7 +38,8 @@ func (this *ServiceHostsServiceImpl) RegisterService(ctx *gin.Context) {
 		urlObj, err := url.Parse(serviceURL)
 
 		if err != nil {
-			common.ThrowError(err)
+			common.WriteErrorResponseOnCtx(err, 400, ctx)
+			return
 		}
 
 		urlString := generateDomainName(urlObj)
@@ -46,7 +47,8 @@ func (this *ServiceHostsServiceImpl) RegisterService(ctx *gin.Context) {
 		var entity = model.ServiceEntity{ServiceName: serviceName, Host: urlString}
 
 		if err := this.serviceHostsRepository.SaveHosts(entity); err != nil {
-			common.ThrowError(err)
+			common.WriteErrorResponseOnCtx(err, 500, ctx)
+			return
 		}
 	}
 }
@@ -57,13 +59,15 @@ func (this *ServiceHostsServiceImpl) ReturnServices(ctx *gin.Context) {
 	services, err := this.serviceHostsRepository.GetAllServicesAndHosts()
 
 	if err != nil {
-		common.ThrowError(err)
+		common.WriteErrorResponseOnCtx(err, 500, ctx)
+		return
 	}
 
 	// genetate services-hosts map.
 	serviceMapper, err := generateServiceHostsMapper(services)
 	if err != nil {
-		common.ThrowError(err)
+		common.WriteErrorResponseOnCtx(err, 500, ctx)
+		return
 	}
 
 	ctx.JSON(http.StatusOK, serviceMapper)

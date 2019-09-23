@@ -20,9 +20,9 @@ var (
 func SetRouter(r *gin.Engine) *gin.Engine {
 	r.POST(REGISTER, serviceHostsService.RegisterService)
 	r.GET(SERVICES, serviceHostsService.ReturnServices)
-	r.GET(PROXY_X, proxyHandlerService.RequestHandler)
-	r.POST(PROXY_X, proxyHandlerService.RequestHandler)
-	r.PUT(PROXY_X, proxyHandlerService.RequestHandler)
-	r.DELETE(PROXY_X, proxyHandlerService.RequestHandler)
+	// proxy pattern.
+	r.NoRoute(func(ctx *gin.Context) {
+		proxyHandlerService.RequestHandler(ctx)
+	})
 	return r
 }
