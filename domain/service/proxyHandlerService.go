@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"errors"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -10,9 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/render"
+	"github.com/kcwebapply/svad/adapter"
 	"github.com/kcwebapply/svad/common"
 	"github.com/kcwebapply/svad/domain/model"
-	"github.com/kcwebapply/svad/infrastructure/http_wrapper"
 	"github.com/kcwebapply/svad/infrastructure/repository"
 )
 
@@ -26,65 +26,71 @@ func NewProxyHandlerServiceImpl() ProxyHandlerService {
 }
 
 func (this *ProxyHandlerServiceImpl) RequestHandler(ctx *gin.Context) {
+	if !strings.HasPrefix(ctx.Request.URL.Path, "/svad/") {
+		common.ReturnErrorResponseToUser(errors.New("request path doesn't begin with '/svad/' path."), 400, ctx)
+	}
+
 	// extract svad request info from http request..
 	serviceName := ctx.GetHeader(common.SERVICE_NAME_HEADER_NAME)
 	requestTypeEnum := GetRequestTypeEnum(ctx.GetHeader(common.REQUEST_TYPE_HEADER_NAME))
+	contentType := ctx.ContentType()
+	requestObject := ctx.Request
+	requestPath := getOriginalPath(requestObject.URL.Path)
 
-	// generate urlstring list
+	// fetch registered url list by service name.
 	serviceHostsEntities, err := this.serviceHostsRepository.GetHostsByServiceName(serviceName)
 	if err != nil {
-		common.ThrowError(err)
+		common.WriteErrorResponseOnCtx(err, 500, ctx)
 	}
-	urlList := generateUrlList(serviceHostsEntities)
 
-	if requestTypeEnum.StringValue == RANDOM.StringValue {
-		rand.Seed(time.Now().UnixNano())
-		random_number := rand.Intn(len(urlList))
-		requestURL := urlList[random_number]
-		path := getPath(ctx)
-		response, err := doRequest(requestURL+path, ctx.ContentType(), ctx.Request)
+	if len(serviceHostsEntities) == 0 {
+		common.WriteErrorResponseOnCtx(errors.New("request service doesn't registered on this server"), 404, ctx)
+		return
+	}
+	urlList := generateUrlListFromServiceHostsEntity(serviceHostsEntities)
+
+	//proxyRequest(urlList, requestTypeEnum, ctx)
+	switch requestTypeEnum.StringValue {
+	case RANDOM.StringValue:
+		response, err := randomProxyRequest(urlList, requestPath, contentType, requestObject)
 		if err != nil {
-			common.ThrowError(err)
+			common.WriteErrorResponseOnCtx(err, 500, ctx)
+			return
 		}
-
-		responseJsonToUser(response, ctx)
-
-	} else if requestTypeEnum.StringValue == ALL.StringValue {
-		for _, requestURL := range urlList {
-			doRequest(requestURL, ctx.ContentType(), ctx.Request)
-		}
+		responseToUser(response, ctx)
+	case ALL.StringValue:
+		responseList, _ := allProxyRequest(urlList, requestPath, contentType, requestObject)
+		responseToUser(responseList[0], ctx)
 	}
 
 }
 
-func getBody(ctx *gin.Context) string {
-	buf := make([]byte, 1024)
-	num, _ := ctx.Request.Body.Read(buf)
-	reqBody := string(buf[0:num])
-	return reqBody
+func randomProxyRequest(urlList []string, path, contentType string, request *http.Request) (*http.Response, error) {
+	rand.Seed(time.Now().UnixNano())
+	requestURL := urlList[rand.Intn(len(urlList))]
+	return adapter.ProxyRequest(requestURL+path, contentType, request)
 }
 
-func getPath(ctx *gin.Context) string {
-	path := ctx.Request.URL.Path
-	return strings.Replace(path, "/svad", "", 1)
-}
-
-func copyResponseHeader(srcHeader http.Header, ctx *gin.Context) *gin.Context {
-	for k, vs := range srcHeader {
-		//ctx.Header(k, vs)
-		for _, v := range vs {
-			fmt.Printf("k:%s,v%s\n", k, v)
-			ctx.Header(k, v)
+func allProxyRequest(urlList []string, path, contentType string, request *http.Request) ([]*http.Response, []error) {
+	responseList := [](*http.Response){}
+	errorList := []error{}
+	// refactor to using async request.
+	for _, requestURL := range urlList {
+		response, err := adapter.ProxyRequest(requestURL+path, contentType, request)
+		if err != nil {
+			errorList = append(errorList, err)
+		} else {
+			responseList = append(responseList, response)
 		}
 	}
-
-	return ctx
+	return responseList, errorList
 }
 
-func responseJsonToUser(response *http.Response, ctx *gin.Context) {
+func responseToUser(response *http.Response, ctx *gin.Context) {
 	b, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		common.ThrowError(err)
+		common.WriteErrorResponseOnCtx(err, 500, ctx)
+		return
 	}
 	ctx.Writer.WriteHeader(response.StatusCode)
 	ctx = copyResponseHeader(response.Header, ctx)
@@ -94,28 +100,23 @@ func responseJsonToUser(response *http.Response, ctx *gin.Context) {
 		})
 }
 
-func doRequest(requestURL string, contentType string, request *http.Request) (*http.Response, error) {
-	switch request.Method {
-	case http.MethodGet:
-		response, err := http_wrapper.GetRequest(requestURL, request)
-		return response, err
-	case http.MethodPost:
-		response, err := http_wrapper.PostRequest(requestURL, contentType, request)
-		return response, err
-	case http.MethodPut:
-		response, err := http_wrapper.PutRequest(requestURL, contentType, request)
-		return response, err
-	case http.MethodDelete:
-		response, err := http_wrapper.DeleteRequest(requestURL, contentType, request)
-		return response, err
-	}
-	return nil, fmt.Errorf("request method  %s doesn't supporeted on this server", request.Method)
-}
-
-func generateUrlList(serviceHostsEntities []model.ServiceEntity) []string {
+func generateUrlListFromServiceHostsEntity(serviceHostsEntities []model.ServiceEntity) []string {
 	urlList := []string{}
 	for _, e := range serviceHostsEntities {
 		urlList = append(urlList, e.Host)
 	}
 	return urlList
+}
+
+func getOriginalPath(path string) string {
+	return strings.Replace(path, "/svad", "", 1)
+}
+
+func copyResponseHeader(srcHeader http.Header, ctx *gin.Context) *gin.Context {
+	for k, vs := range srcHeader {
+		for _, v := range vs {
+			ctx.Header(k, v)
+		}
+	}
+	return ctx
 }
