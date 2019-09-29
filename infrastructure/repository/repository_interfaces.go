@@ -6,5 +6,7 @@ import "github.com/kcwebapply/svad/domain/model"
 type ServiceHostsRepository interface {
 	GetHostsByServiceName(string) ([]model.ServiceEntity, error)
 	GetAllServicesAndHosts() ([]model.ServiceEntity, error)
-	SaveHosts(model.ServiceEntity) error
+	SaveHost(model.ServiceEntity) error
+	DeleteHost(model.ServiceEntity) error
+	DeleteService(string) error
 }

@@ -27,7 +27,7 @@ func NewProxyHandlerServiceImpl() ProxyHandlerService {
 
 func (this *ProxyHandlerServiceImpl) RequestHandler(ctx *gin.Context) {
 	if !strings.HasPrefix(ctx.Request.URL.Path, "/svad/") {
-		common.ReturnErrorResponseToUser(errors.New("request path doesn't begin with '/svad/' path."), 400, ctx)
+		common.WriteErrorResponseOnCtx(errors.New("request path doesn't begin with '/svad/' path."), 400, ctx)
 	}
 
 	// extract svad request info from http request..

@@ -6,8 +6,10 @@ import (
 )
 
 const (
-	REGISTER = "/register"
-	SERVICES = "/services/"
+	REGISTER       = "/register"
+	SERVICES       = "/services"
+	DELETE         = "/delete"
+	DELETE_SERVICE = "/delete_service"
 
 	PROXY_X = "/svad/:endpoint"
 )
@@ -18,8 +20,10 @@ var (
 )
 
 func SetRouter(r *gin.Engine) *gin.Engine {
-	r.POST(REGISTER, serviceHostsService.RegisterService)
+	r.POST(REGISTER, serviceHostsService.RegisterHosts)
 	r.GET(SERVICES, serviceHostsService.ReturnServices)
+	r.DELETE(DELETE, serviceHostsService.DeleteHosts)
+	r.DELETE(DELETE_SERVICE, serviceHostsService.DeleteService)
 	// proxy pattern.
 	r.NoRoute(func(ctx *gin.Context) {
 		proxyHandlerService.RequestHandler(ctx)

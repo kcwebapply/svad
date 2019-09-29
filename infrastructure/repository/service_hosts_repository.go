@@ -31,8 +31,22 @@ func (repository *ServiceHostsRepositoryImpl) GetAllServicesAndHosts() ([]model.
 	return serviceHosts, nil
 }
 
-func (repository *ServiceHostsRepositoryImpl) SaveHosts(e model.ServiceEntity) error {
+func (repository *ServiceHostsRepositoryImpl) SaveHost(e model.ServiceEntity) error {
 	if _, err := sess.InsertInto(tableName).Columns("service_name", "host").Record(e).Exec(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repository *ServiceHostsRepositoryImpl) DeleteHost(e model.ServiceEntity) error {
+	if _, err := sess.DeleteFrom(tableName).Where("service_name=?", e.ServiceName).Where("host =?", e.Host).Exec(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repository *ServiceHostsRepositoryImpl) DeleteService(serviceName string) error {
+	if _, err := sess.DeleteFrom(tableName).Where("service_name=?", serviceName).Exec(); err != nil {
 		return err
 	}
 	return nil
