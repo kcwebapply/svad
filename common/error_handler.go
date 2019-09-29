@@ -5,10 +5,10 @@ import (
 )
 
 func WriteErrorResponseOnCtx(err error, statusCode int, ctx *gin.Context) {
-	var errorResponse errorResponseStruct = errorResponseStruct{Messate: err.Error()}
+	var errorResponse errorResponseStruct = errorResponseStruct{Message: err.Error()}
 	ctx.JSON(statusCode, errorResponse)
 }
 
 type errorResponseStruct struct {
-	Messate string
+	Message string
 }

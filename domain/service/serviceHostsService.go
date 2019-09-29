@@ -20,11 +20,11 @@ func NewSerivceImpl() ServiceHostsService {
 }
 
 // RegisterService save service - host binding.
-func (this *ServiceHostsServiceImpl) RegisterService(ctx *gin.Context) {
+func (this *ServiceHostsServiceImpl) RegisterHosts(ctx *gin.Context) {
 	// get service name
 	var serviceName = ctx.GetHeader(common.SERVICE_NAME_HEADER_NAME)
 	// requestBody
-	requestBody := RegisterBody{}
+	requestBody := HostsBody{}
 	if err := ctx.BindJSON(&requestBody); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "BadRequest"})
 		return
@@ -46,7 +46,7 @@ func (this *ServiceHostsServiceImpl) RegisterService(ctx *gin.Context) {
 
 		var entity = model.ServiceEntity{ServiceName: serviceName, Host: urlString}
 
-		if err := this.serviceHostsRepository.SaveHosts(entity); err != nil {
+		if err := this.serviceHostsRepository.SaveHost(entity); err != nil {
 			common.WriteErrorResponseOnCtx(err, 500, ctx)
 			return
 		}
@@ -74,7 +74,57 @@ func (this *ServiceHostsServiceImpl) ReturnServices(ctx *gin.Context) {
 
 }
 
-type RegisterBody struct {
+func (this *ServiceHostsServiceImpl) DeleteHosts(ctx *gin.Context) {
+	var serviceName = ctx.GetHeader(common.SERVICE_NAME_HEADER_NAME)
+	// requestBody
+	requestBody := HostsBody{}
+	if err := ctx.BindJSON(&requestBody); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "BadRequest"})
+		return
+	}
+
+	// get urlhosts
+	serviceURLList := requestBody.Hosts
+
+	// Register Services
+	for _, serviceURL := range serviceURLList {
+
+		urlObj, err := url.Parse(serviceURL)
+
+		if err != nil {
+			common.WriteErrorResponseOnCtx(err, 400, ctx)
+			return
+		}
+
+		urlString := generateDomainName(urlObj)
+
+		var entity = model.ServiceEntity{ServiceName: serviceName, Host: urlString}
+
+		if err := this.serviceHostsRepository.DeleteHost(entity); err != nil {
+			common.WriteErrorResponseOnCtx(err, 500, ctx)
+			return
+		}
+	}
+
+}
+
+func (this *ServiceHostsServiceImpl) DeleteService(ctx *gin.Context) {
+	var serviceName = ctx.GetHeader(common.SERVICE_NAME_HEADER_NAME)
+	// requestBody
+	requestBody := HostsBody{}
+	if err := ctx.BindJSON(&requestBody); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "BadRequest"})
+		return
+	}
+
+	if err := this.serviceHostsRepository.DeleteService(serviceName); err != nil {
+		common.WriteErrorResponseOnCtx(err, 500, ctx)
+		return
+	}
+
+}
+
+type HostsBody struct {
 	Hosts []string `json:"hosts" binding:"required"`
 }
 

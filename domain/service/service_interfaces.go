@@ -13,6 +13,8 @@ type ProxyHandlerService interface {
 
 // ServiceHostsService deal with service-host entity data.
 type ServiceHostsService interface {
-	RegisterService(ctx *gin.Context)
+	RegisterHosts(ctx *gin.Context)
 	ReturnServices(ctx *gin.Context)
+	DeleteHosts(ctx *gin.Context)
+	DeleteService(ctx *gin.Context)
 }
