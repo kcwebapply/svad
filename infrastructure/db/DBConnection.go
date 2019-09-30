@@ -54,7 +54,6 @@ func InitDb(filePath string) {
 		os.Exit(0)
 	}
 
-	//connection, err := dbr.Open(driver, user+":"+password+"@"+host+"/"+dbname+"?sslmode=disable", nil)
 	connection, err := dbr.Open(driver, "user="+user+" password="+password+" dbname="+dbname+" host="+host+" sslmode=disable", nil)
 	if err != nil {
 		fmt.Println("error happened in connection:", err)
