@@ -10,7 +10,7 @@ var (
 	sess   *dbr.Session
 )
 
-func init() {
+func InitRepository() {
 	dbConn = db.GetConnection()
 	//Db.SetMaxOpenConns(10)
 	sess = dbConn.NewSession(nil)
