@@ -64,18 +64,20 @@ you can get service list with its binded hosts.
   - request_type: `request_type` only allows two values `all` or `rand`.
     - `all` diffuse http_request to all hosts binded with service.
     - `rand` select only 1 host for forwading request.
+- requestmethod: only `GET`, `POST` , `PUT`, `DELETE` can be used.
 
-
+##### rand type proxy
 ```shell
-## rand type proxy
 curl http://localhost:8888/svad/posts/1 -H "service_name:api" -H "request_type:rand"
 
 --> proxying request to 
 GET https://jsonplaceholder.typicode.com/posts/1
 or 
 GET https://jsonplaceholder.typicode.com/posts/1
+```
 
-## all type proxy
+##### all type proxy
+```shell
 curl http://localhost:8888/svad/posts/1 -H "service_name:api" -H "request_type:all"
 
 -->proxying request to 
