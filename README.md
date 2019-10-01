@@ -11,10 +11,9 @@ go get github.com/kcwebapply/svad
 
 ```
 
+- [get services](#services)
+- [register service and host](#register)
 - [proxy](#proxy)
-- [add (add memo)](#add)
-- [rm (delete memo)](#rm)
-- [clear (delete all memo)](#clear)
 
 
 ### register
